@@ -2,7 +2,7 @@ import json
 import os
 
 # JSON 파일 경로
-data_file = 'D:/bot/potterEase/recipients.json'
+data_file = '../potterEase/recipients.json'
 
 # 수신자 데이터 초기화
 recipients = {
