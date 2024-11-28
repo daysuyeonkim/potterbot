@@ -5,7 +5,7 @@ from datetime import datetime
 from discord.ext import commands
 
 # JSON 파일 경로
-data_file = '../potterEase/user_assets.json'
+data_file = 'user_assets.json'
 
 # 자산 정보를 저장할 파일이 없으면 생성
 if not os.path.exists(data_file):
