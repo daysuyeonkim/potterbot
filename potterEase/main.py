@@ -11,7 +11,7 @@ import money  # money.py 모듈 임포트
 import subprocess
 
 # oshimagic_bot.py를 서브 프로세스로 실행
-subprocess.Popen(['python', 'D:/bot/potter_oshimagic/oshimagic_bot.py'])
+subprocess.Popen(['python', '../potter_oshimagic/oshimagic_bot.py'])
 
 # Intents 설정
 intents = discord.Intents.default()

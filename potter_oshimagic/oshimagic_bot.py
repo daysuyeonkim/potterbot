@@ -13,8 +13,8 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='%', intents=intents)
 
-# 데이터 파일 경로 설정 (절대 경로)
-base_path = 'D:/bot/potter_oshimagic/'
+# 데이터 파일 경로 설정
+base_path = '../potter_oshimagic/'
 data_file = os.path.join(base_path, 'user_data.json')
 before_data_file = os.path.join(base_path, 'before_user_data.json')
 count_file = os.path.join(base_path, 'ohaa_count.json')
@@ -22,8 +22,8 @@ appeal_file = os.path.join(base_path, 'user_appeal_scores.json')
 before_appeal_file = os.path.join(base_path, 'before_appeal_scores.json')  
 ohaa_usage_file = os.path.join(base_path, 'ohaa_usage.json')
 
-# user_assets.json 파일 경로 (고정 경로)
-assets_file_path = 'D:/bot/potterEase/user_assets.json'
+# user_assets.json 파일 경로
+assets_file_path = '../potterEase/user_assets.json'
 
 # 전역 변수
 server_user_data = {}
