@@ -13,12 +13,14 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='%', intents=intents)
 
-# 데이터 파일 경로
-data_file = 'user_data.json'
-count_file = 'ohaa_count.json'
-appeal_file = 'user_appeal_scores2.json' 
-before_appeal_file = 'user_appeal_scores.json'  
-ohaa_usage_file = 'ohaa_usage.json'
+# 데이터 파일 경로 설정 (절대 경로)
+base_path = 'D:/bot/potter_oshimagic/'
+data_file = os.path.join(base_path, 'user_data.json')
+before_data_file = os.path.join(base_path, 'before_user_data.json')
+count_file = os.path.join(base_path, 'ohaa_count.json')
+appeal_file = os.path.join(base_path, 'user_appeal_scores.json') 
+before_appeal_file = os.path.join(base_path, 'before_appeal_scores.json')  
+ohaa_usage_file = os.path.join(base_path, 'ohaa_usage.json')
 
 # user_assets.json 파일 경로 (고정 경로)
 assets_file_path = 'D:/bot/potterEase/user_assets.json'
@@ -153,7 +155,7 @@ async def 예상엔딩(ctx):
     user_id = str(ctx.author.id)
     guild_id = str(ctx.guild.id)
 
-    # user_appeal_scores2.json에서 유저의 어필 점수 가져오기
+    # 어필 점수 가져오기
     with open(appeal_file, 'r') as f:
         user_appeal_scores = json.load(f)
 
@@ -179,71 +181,42 @@ async def 예상엔딩(ctx):
     else:
         await ctx.send("💖 **진엔드 (True End)**: 17점 ~ 20점")
 
-
 @bot.command()
 async def 러브포인트(ctx):
+    guild_id = str(ctx.guild.id)
     user_id = str(ctx.author.id)
-    guild_id = str(ctx.guild.id)  # 서버 ID
 
-    # 현재 유저의 LOVE POINT 가져오기
-    user_points = server_user_data.get(guild_id, {}).get(user_id, {}).get('love_points', 0)
+    # user_data.json에서 LOVE POINT 가져오기
+    with open(data_file, 'r') as f:
+        server_user_data = json.load(f)
 
-    # 유저의 닉네임 저장
-    user_name = ctx.author.display_name  # display_name 사용
-    if guild_id not in server_user_data:
-        server_user_data[guild_id] = {}
-    if user_id not in server_user_data[guild_id]:
-        # 초기화 시 nickname도 설정
-        server_user_data[guild_id][user_id] = {'love_points': user_points, 'nickname': user_name}
-    else:
-        # 닉네임 업데이트
-        server_user_data[guild_id][user_id]['nickname'] = user_name  
+    # 유저의 LOVE POINT 가져오기
+    user_data = server_user_data.get(guild_id, {}).get(user_id, {})
+    user_love_points = user_data.get('love_points', 0)
 
-    # 데이터 저장
-    with open(data_file, 'w') as f:
-        json.dump(server_user_data, f)
+    # [ 사랑을 먹는 자··· ] 결과 출력
+    love_rank_message = f"### 내가 지금까지 모은 LOVE POINT: {user_love_points}\n"
+    love_rank_message += "\n**[ 사랑을 먹는 자··· ]**\n"
 
-    # 결과 메시지 생성
-    rank_message = f'### 내가 지금까지 모은 LOVE POINT: {user_points}\n'
-
-    # 서버 내 모든 유저의 LOVE POINT 가져오기
-    all_users = server_user_data.get(guild_id, {}).items()
-    sorted_users = sorted(all_users, key=lambda x: x[1]['love_points'], reverse=True)
-
-    # 상위 3명 추출
+    # 모든 유저의 LOVE POINT 가져오기 (user_data.json 기준)
+    all_users = server_user_data.get(guild_id, {})
+    sorted_users = sorted(all_users.items(), key=lambda x: x[1].get('love_points', 0), reverse=True)
     top_users = sorted_users[:3]
 
-    rank_message += "\n**[ 사랑을 먹는 자··· ]**\n"
+    for rank, (uid, data) in enumerate(top_users, start=1):
+        member = ctx.guild.get_member(int(uid))
+        ranking_name = member.display_name if member else "Unknown User"
+        love_rank_message += f"💘  **{rank}위** {ranking_name}: {data['love_points']} 포인트\n"
 
-    for rank, (user_id, user_data) in enumerate(top_users, start=1):
-        member = ctx.guild.get_member(int(user_id))  # 유저의 멤버 객체 가져오기
-        ranking_name = member.display_name if member else user_data.get('nickname', "Unknown User")  # 멤버가 없으면 저장된 닉네임 사용
-        rank_message += f"💘  **{rank}위** {ranking_name}: {user_data['love_points']} 포인트\n"
+    await ctx.send(love_rank_message)
 
-    await ctx.send(rank_message)
+    # [ Normal 클리어 결과 ] 고정된 메시지 출력
+    normal_rank_message = "\n**[ Normal 클리어 결과 ]**\n"
+    normal_rank_message += "💘  **1위** 어부 키릴 데 바벨: 216 포인트\n"
+    normal_rank_message += "💘  **2위** 떨어진 천사 에이셔 오포드: 132 포인트\n"
+    normal_rank_message += "💘  **3위** 트윌리 오스만투스: 101 포인트\n"
 
-    # user_appeal_scores.json의 내용 사용
-    with open(before_appeal_file, 'r') as f:  # before_appeal_file로 변경
-        user_appeal_scores = json.load(f)
-
-    # 유저의 어필 점수 가져오기
-    user_appeal_score = user_appeal_scores.get(user_id, {'total_score': 0, 'count': 0})
-
-    # 어필 점수 결과 출력
-    appeal_rank_message = "\n**[ Normal 클리어 결과 ]**\n"
-    
-    # 상위 3명의 어필 점수 추출
-    all_appeal_users = user_appeal_scores.items()
-    sorted_appeal_users = sorted(all_appeal_users, key=lambda x: x[1]['total_score'], reverse=True)
-    top_appeal_users = sorted_appeal_users[:3]
-
-    for rank, (user_id, user_data) in enumerate(top_appeal_users, start=1):
-        member = ctx.guild.get_member(int(user_id))
-        # 여기에서 닉네임을 user_data에서 가져오도록 수정
-        ranking_name = member.display_name if member else server_user_data.get(guild_id, {}).get(user_id, {}).get('nickname', "Unknown User")
-        appeal_rank_message += f"💘  **{rank}위** {ranking_name}: {user_data['total_score']} 포인트\n"
-
-    await ctx.send(appeal_rank_message)
+    await ctx.send(normal_rank_message)
 
 @bot.command()
 async def 공략현황(ctx):
