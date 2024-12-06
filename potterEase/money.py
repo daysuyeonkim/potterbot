@@ -2,6 +2,7 @@ import json
 import os
 import asyncio
 from datetime import datetime
+import pytz  # pytz 임포트
 from discord.ext import commands
 
 # JSON 파일 경로
