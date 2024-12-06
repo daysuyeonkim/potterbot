@@ -58,10 +58,10 @@ def can_attend_today(user_id):
     if last_attendance is None:
         return True  # 출석 기록이 없는 경우
     
-    last_attendance_date = datetime.strptime(last_attendance, '%Y-%m-%d')
-    today = datetime.now(kst)  # KST로 설정
+    last_attendance_date = datetime.strptime(last_attendance, '%Y-%m-%d').date()  # 날짜로 변환
+    today = datetime.now(kst).date()  # KST로 오늘 날짜 가져오기
     
-    return last_attendance_date.date() < today.date()
+    return last_attendance_date < today  # 날짜 비교 수정
 
 # '%ㅊㅊ' 또는 '%출석' 명령어 처리
 async def handle_attendance(ctx):
