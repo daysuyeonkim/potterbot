@@ -4,7 +4,11 @@ import json
 import os
 import asyncio
 from datetime import datetime
+import pytz  # pytz 임포트 추가
 from discord.ext import commands
+
+# KST 시간대 가져오기
+kst = pytz.timezone('Asia/Seoul')  # KST 정의 추가
 
 # Intent 설정
 intents = discord.Intents.default()
@@ -356,7 +360,7 @@ bonus_list = [
 @bot.command()
 async def 오하아사(ctx):
     guild_id = str(ctx.guild.id)
-    today = datetime.now().date()  # 오늘 날짜
+    today = datetime.now(kst).date()  # 오늘 날짜를 KST로 가져오기
 
     # 서버가 오늘 이미 사용했는지 확인
     if guild_id in ohaa_usage and ohaa_usage[guild_id] == str(today):  # 문자열로 비교

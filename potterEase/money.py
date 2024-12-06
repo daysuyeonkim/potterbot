@@ -5,6 +5,9 @@ from datetime import datetime
 import pytz  # pytz 임포트
 from discord.ext import commands
 
+# KST 시간대 가져오기
+kst = pytz.timezone('Asia/Seoul')  # 추가된 부분
+
 # JSON 파일 경로
 data_file = 'user_assets.json'
 
@@ -31,7 +34,7 @@ def update_assets(user_id, amount):
         assets[user_id] = {'크렛': 0, 'last_attendance': None, '가구': {}}
     
     assets[user_id]['크렛'] += amount
-    assets[user_id]['last_attendance'] = datetime.now().strftime('%Y-%m-%d')
+    assets[user_id]['last_attendance'] = datetime.now(kst).strftime('%Y-%m-%d')  # KST로 설정
     save_assets(assets)
 
 # 유저의 크렛을 조회하는 함수
@@ -56,7 +59,7 @@ def can_attend_today(user_id):
         return True  # 출석 기록이 없는 경우
     
     last_attendance_date = datetime.strptime(last_attendance, '%Y-%m-%d')
-    today = datetime.now()
+    today = datetime.now(kst)  # KST로 설정
     
     return last_attendance_date.date() < today.date()
 
