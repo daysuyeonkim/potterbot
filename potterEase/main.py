@@ -126,4 +126,4 @@ if not os.path.exists(data_file):
 
 # ------------------------------------------------------------------------------------------
 # 토큰을 입력하세요.
-bot.run('MTMzMzQ0NzA4NTAwNTIwOTY5MQ.GpXn7C.ApChqLrzw9WWQks8Z1_xH9vBZpn1-GTxF2Dcm8')
+bot.run('MTI5MDg2NDAyNDE3NDcyNzE2OA.GhbLjj.RgO8ooWhDs8XTx4WP4v1nczxClP-kSRmZVmbCY')
