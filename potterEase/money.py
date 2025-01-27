@@ -1,12 +1,18 @@
 import json
 import os
 import asyncio
+import sys
 from datetime import datetime
 import pytz  # pytz 임포트
 from discord.ext import commands
+import discord  # discord 모듈 임포트 필요
+
+# 절대 경로를 사용하여 gacha_command 임포트
+sys.path.append(os.path.join(os.path.dirname(__file__), 'member Selection_Dormitory Score'))
+from member_selection_dormitory_score import gacha_command  # gacha_command 임포트
 
 # KST 시간대 가져오기
-kst = pytz.timezone('Asia/Seoul')  # 추가된 부분
+kst = pytz.timezone('Asia/Seoul')
 
 # JSON 파일 경로
 data_file = 'user_assets.json'
@@ -21,6 +27,11 @@ def load_assets():
     with open(data_file, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+# 유저의 가구 정보를 조회하는 함수
+def get_furniture(user_id):
+    assets = load_assets()
+    return assets.get(user_id, {}).get('가구', {})
+
 # 자산 정보를 저장하는 함수
 def save_assets(assets):
     with open(data_file, 'w', encoding='utf-8') as f:
@@ -34,18 +45,13 @@ def update_assets(user_id, amount):
         assets[user_id] = {'크렛': 0, 'last_attendance': None, '가구': {}}
     
     assets[user_id]['크렛'] += amount
-    assets[user_id]['last_attendance'] = datetime.now(kst).strftime('%Y-%m-%d')  # KST로 설정
+    assets[user_id]['last_attendance'] = datetime.now(kst).strftime('%Y-%m-%d')
     save_assets(assets)
 
 # 유저의 크렛을 조회하는 함수
 def get_크렛(user_id):
     assets = load_assets()
     return assets.get(user_id, {'크렛': 0})['크렛']
-
-# 유저의 가구 정보를 조회하는 함수
-def get_furniture(user_id):
-    assets = load_assets()
-    return assets.get(user_id, {}).get('가구', {})
 
 # 출석 가능한지 확인하는 함수
 def can_attend_today(user_id):
@@ -61,7 +67,7 @@ def can_attend_today(user_id):
     last_attendance_date = datetime.strptime(last_attendance, '%Y-%m-%d').date()  # 날짜로 변환
     today = datetime.now(kst).date()  # KST로 오늘 날짜 가져오기
     
-    return last_attendance_date < today  # 날짜 비교 수정
+    return last_attendance_date < today  # 날짜 비교
 
 # '%ㅊㅊ' 또는 '%출석' 명령어 처리
 async def handle_attendance(ctx):
@@ -73,6 +79,49 @@ async def handle_attendance(ctx):
     
     update_assets(user_id, 1)  # 1크렛을 획득
     await ctx.send(f'**{ctx.author.display_name}**님, 출석 완료! **1크렛**을 획득하였습니다!')
+
+# 쿠폰 목록을 반환하는 함수
+def get_coupons():
+    return [
+        {"name": "스페셜 인형뽑기 쿠폰", "cost": 10, "command": "%인형뽑기"}
+    ]
+
+# '%쿠폰' 명령어 처리
+async def handle_coupons(ctx):
+    coupons = get_coupons()
+    if not coupons:
+        await ctx.send("이용 가능한 쿠폰이 없습니다.")
+        return
+
+    # 쿠폰 목록을 embed 형태로 전송
+    embed = discord.Embed(title="현재 이용 가능한 쿠폰", color=discord.Color.blue())
+    view = discord.ui.View()
+
+    for coupon in coupons:
+        button_label = f"{coupon['name']} ({coupon['cost']}크렛)"
+        button = discord.ui.Button(label=button_label, style=discord.ButtonStyle.primary)
+        
+        # 버튼 클릭 시 상호작용 처리
+        async def button_callback(interaction, command=coupon['command']):
+            await handle_coupon_use(interaction, command)
+
+        button.callback = button_callback
+        view.add_item(button)
+
+    await ctx.send(embed=embed, view=view)
+
+# 쿠폰 사용 처리
+async def handle_coupon_use(interaction, command):
+    await interaction.response.defer()  # 상호작용 응답을 지연시킴
+    user_id = str(interaction.user.id)
+
+    if command == "%인형뽑기":
+        크렛_amount = get_크렛(user_id)
+        if 크렛_amount >= 10:
+            ctx = interaction.channel
+            await gacha_command(ctx)  # gacha_command 호출
+        else:
+            await interaction.followup.send(f'크렛이 부족합니다. 현재 보유 중인 크렛: **{크렛_amount}**크렛입니다.')
 
 # '%크렛' 명령어 처리
 async def handle_check_크렛(ctx):
@@ -188,6 +237,10 @@ def setup(bot):
     async def check_furniture_command(ctx):
         await handle_check_furniture(ctx)
 
-    @bot.command(name='가구삭제')  # 가구 삭제 명령어 추가
+    @bot.command(name='가구삭제')
     async def delete_furniture_command(ctx):
-        await handle_delete_furniture(ctx)  # 삭제 처리 함수 호출
+        await handle_delete_furniture(ctx)
+
+    @bot.command(name='쿠폰')
+    async def coupons_command(ctx):
+        await handle_coupons(ctx)
