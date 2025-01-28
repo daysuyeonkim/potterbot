@@ -16,7 +16,7 @@ def setup(bot):
     bot.add_command(gacha_command)  # gacha_command를 등록
 
 # 파일 경로
-SCORES_FILE = "scores.txt"
+SCORES_FILE = os.path.join(os.path.dirname(__file__), "scores.txt")
 
 # 점수 데이터 초기화
 points = {}
@@ -67,6 +67,9 @@ def load_scores():
             except ValueError:
                 print(f"잘못된 데이터 형식: {line.strip()}")
 
+# 초기 점수 로드
+load_scores()
+
 ### 점수 관련 명령어 ###
 @commands.command(name="기숙사점수")
 async def show_scores_rankings(ctx, page: int = 1):
@@ -77,7 +80,7 @@ async def show_scores_rankings(ctx, page: int = 1):
     scores_per_page = 10
     sorted_scores = sorted(points.items(), key=lambda x: x[1], reverse=True)
 
-    total_pages = (len(sorted_scores) - 1) // scores_per_page + 1
+    total_pages = (len(sorted_scores) - 1) // scores_per_page + 1  # scores_per_page 변수 사용
     if page < 1 or page > total_pages:
         await ctx.send(f"페이지 번호는 1에서 {total_pages} 사이여야 합니다.")
         return
@@ -98,15 +101,14 @@ async def show_scores_rankings(ctx, page: int = 1):
     await ctx.send(embed=embed)
 
     if page < total_pages:
-        await ctx.send(f"⚠️ 다음 페이지는 `%순위 {page + 1}` 명령어로 확인하세요.")
+        await ctx.send(f"⚠️ 다음 페이지는 `%기숙사점수 {page + 1}` 명령어로 확인하세요.")
 
 @commands.command(name="점수추가")
 @commands.has_permissions(administrator=True)
 async def add_points(ctx, scores_name: str, score_to_add: int):
-    scores_name = scores_name.capitalize()
     if scores_name not in points:
-        valid_names = ", ".join(points.keys())
-        await ctx.send(f"`{scores_name}`은(는) 존재하지 않는 이름입니다. 사용 가능한 이름: {valid_names}")
+        valid_names = ", ".join(points.keys())  # 기숙사 목록을 가져옴
+        await ctx.send(f"{scores_name}은(는) 존재하지 않는 기숙사입니다. 현재 입력 가능한 기숙사 목록: {valid_names}")
         return
 
     points[scores_name] += score_to_add
@@ -122,10 +124,9 @@ async def add_points(ctx, scores_name: str, score_to_add: int):
 @commands.command(name="점수감점")
 @commands.has_permissions(administrator=True)
 async def subtract_points(ctx, scores_name: str, score_to_subtract: int):
-    scores_name = scores_name.capitalize()
     if scores_name not in points:
         valid_names = ", ".join(points.keys())
-        await ctx.send(f"`{scores_name}`은(는) 존재하지 않는 이름입니다. 사용 가능한 이름: {valid_names}")
+        await ctx.send(f"{scores_name}은(는) 존재하지 않는 기숙사입니다. 현재 입력 가능한 기숙사 목록: {valid_names}")
         return
 
     points[scores_name] -= score_to_subtract
@@ -199,7 +200,6 @@ class GachaView(discord.ui.View):
 
 @commands.command(name="인형뽑기")
 async def gacha_command(ctx):
-
     # GachaView 생성 및 메시지 전송
     view = GachaView()
     await ctx.send("스폐셜한 인형을 뽑아보세요!", view=view)
