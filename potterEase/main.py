@@ -8,6 +8,9 @@ import subprocess  # subprocess 모듈 추가
 
 # 환경 변수 로드
 from dotenv import load_dotenv
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+
 
 # 사용자 데이터 및 명령어 처리 모듈
 from stats import (
@@ -138,4 +141,4 @@ if not os.path.exists(data_file):
 
 # ------------------------------------------------------------------------------------------
 # 토큰을 입력하세요.
-bot.run('TOKEN')
+bot.run(TOKEN)
