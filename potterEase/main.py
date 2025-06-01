@@ -3,12 +3,24 @@ from discord.ext import commands
 import json
 import random
 import os
-import subprocess  # subprocess 모듈 추가
-from stats import 나, save_user_data, handle_나_command, handle_능력치_command  # commands 모듈 임포트
-import group_maker  # group_maker 모듈 임포트
-import shortcuts 
-import money  # money.py 모듈 임포트
 import sys
+import subprocess  # subprocess 모듈 추가
+
+# 환경 변수 로드
+from dotenv import load_dotenv
+
+# 사용자 데이터 및 명령어 처리 모듈
+from stats import (
+    나,
+    save_user_data,
+    handle_나_command,
+    handle_능력치_command,
+)
+
+# 기타 기능 모듈
+import group_maker  # 그룹 생성 기능
+import shortcuts  # 단축 명령어 기능
+import money  # 금전 관련 기능
 
 # 현재 파일의 디렉토리 경로를 가져옴
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -126,4 +138,4 @@ if not os.path.exists(data_file):
 
 # ------------------------------------------------------------------------------------------
 # 토큰을 입력하세요.
-bot.run('MTI5MDg2NDAyNDE3NDcyNzE2OA.GhbLjj.RgO8ooWhDs8XTx4WP4v1nczxClP-kSRmZVmbCY')
+bot.run('TOKEN')
