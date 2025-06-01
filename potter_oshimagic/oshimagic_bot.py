@@ -6,6 +6,9 @@ import asyncio
 from datetime import datetime
 import pytz  # pytz 임포트 추가
 from discord.ext import commands
+from dotenv import load_dotenv
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
 
 # KST 시간대 가져오기
 kst = pytz.timezone('Asia/Seoul')  # KST 정의 추가
@@ -466,4 +469,4 @@ async def 오시매직(ctx):
     await ctx.send(command_help)
 
 # 봇 토큰으로 봇 실행
-bot.run('MTI4MTQ5MDY4NDE1NDc0NDg2NA.GW5Gkz.9g2liv8p_6FNdPD2tocJjjlvsPenJ6XNDLmlGc')
+bot.run(TOKEN)
